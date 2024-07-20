@@ -377,10 +377,33 @@ Result:
     Here's an explanation of its parameters:
 
 - db.collection.replaceOne(
-  - <filter>,
-  - <replacement>,
-  - <options>
+  - filter,
+  - replacement,
+  - options
 - )
+
+  Parameters
+  filter
+
+  - Description: Specifies the criteria to find the document to replace.
+  - Type: Object
+  - Example: { \_id: 1 } to match a document by its unique identifier.
+
+    replacement
+
+    - Description: The new document that will replace the existing one.
+    - Type: Object
+      Note: The \_id field must be included if you want to keep it the same.
+    - Example: { name: "John", age: 30 }
+
+    options
+
+    - Description: Optional settings to modify the behavior of the operation.
+    - Type: Object
+      Common Options:
+    - upsert: If true, creates a new document if no matching document is found.
+    - Default is false.
+      Example: { upsert: true }
 
 ### db.collection.updateOne(filter, update, options)
 
