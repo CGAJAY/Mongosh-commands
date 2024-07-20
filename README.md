@@ -371,6 +371,17 @@ Result:
   - ]
 - });
 
+## Replacing a Document in MongoDB
+
+    This operation completely replaces an existing document with a new one.
+    Here's an explanation of its parameters:
+
+- db.collection.replaceOne(
+  - <filter>,
+  - <replacement>,
+  - <options>
+- )
+
 ### db.collection.updateOne(filter, update, options)
 
      Updates a single document.
