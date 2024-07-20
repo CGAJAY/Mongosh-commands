@@ -290,6 +290,87 @@ Result:
     The query checks each condition independently across all elements in the array.
     It may return documents where one element matches name: "Laptop" and another separate element matches quantity: { $gt: 1 }.
 
+## Finding Documents By Using Logical Operators
+
+    Suppose we have a collection products with the following documents:
+
+- [
+  - { "\_id": 1, "name": "Laptop", "price": 1200, "category": "electronics" },
+  - { "\_id": 2, "name": "Phone", "price": 800, "category": "electronics" },
+  - { "\_id": 3, "name": "Shoes", "price": 100, "category": "clothing" },
+  - { "\_id": 4, "name": "Watch", "price": 200, "category": "accessories" }
+- ]
+
+### $and
+
+    Find documents where both conditions are true.
+
+    Find electronics with a price greater than $500.
+
+- db.products.find({
+  - $and: [
+  - { category: "electronics" },
+  - { price: { $gt: 500 } }
+  - ]
+- });
+
+Result:
+
+- [
+  - { "\_id": 1, "name": "Laptop", "price": 1200, "category": "electronics" },
+  - { "\_id": 2, "name": "Phone", "price": 800, "category": "electronics" }
+- ]
+
+### $or
+
+    Find documents where at least one condition is true.
+    Example: Find items that are either electronics or cost less than $150.
+
+- db.products.find({
+  - $or: [
+    - { category: "electronics" },
+    - { price: { $lt: 150 } }
+  - ]
+- });
+
+  Result:
+
+* [
+  - { "\_id": 1, "name": "Laptop", "price": 1200, "category": "electronics" },
+  - { "\_id": 2, "name": "Phone", "price": 800, "category": "electronics" },
+  - { "\_id": 3, "name": "Shoes", "price": 100, "category": "clothing" }
+* ]
+
+### $not
+
+    Find documents where the condition is not true.
+    Inverts a condition, selecting documents where the condition is false.
+
+### $nor
+
+    Find documents where none of the conditions are true.
+    Combines multiple conditions that must all be false.
+
+### $and with Nested $or
+
+    Find documents where:
+
+- The price is less than 1000
+- And the item is either a "computer" or "mobile"
+
+  Nesting $or within $and lets you create complex queries where you want all conditions of $and to be true, but any condition within $or to be true.
+
+- db.products.find({
+  - $and: [
+  - { price: { $lt: 1000 } },
+  - { $or: [
+    - { tags: "computer" },
+    - { tags: "mobile" }
+  - ]
+  - }
+  - ]
+- });
+
 ### db.collection.updateOne(filter, update, options)
 
      Updates a single document.
