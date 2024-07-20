@@ -236,6 +236,60 @@ Result:
 * { "\_id": 4, "productName": "Monitor", "price": 300, "quantity": 5 }
 * { "\_id": 5, "productName": "Mouse", "price": 25, "quantity": 50 }
 
+## Querying on Array Elements in MongoDB
+
+### $elemMatch
+
+    It is crucial when you want to ensure that multiple criteria apply to the same array element.  Matches documents that contain an array with at least one element that matches all specified criteria.
+
+    Suppose we have a collection orders with the following documents:
+
+- [
+  - { "\_id": 1, "items": [{ "name": "Laptop", "quantity": 2 }, { "name": "Mouse", "quantity": 1 }] },
+  - { "\_id": 2, "items": [{ "name": "Phone", "quantity": 1 }, { "name": "Charger", "quantity": 2 }] },
+  - { "\_id": 3, "items": [{ "name": "Laptop", "quantity": 1 }, { "name": "Phone", "quantity": 3 }] }
+- ]
+
+  Find documents where there is an item with name "Laptop" and quantity greater than 1:
+
+* db.orders.find({
+  - items: { $elemMatch: { name: "Laptop", quantity: { $gt: 1 } } }
+* });
+
+  Result:
+
+* [
+  - { "\_id": 1, "items": [{ "name": "Laptop", "quantity": 2 }, { "name": "Mouse", "quantity": 1 }] }
+* ]
+
+  #### Without Using $elemMatch
+
+  Find documents where any item has name "Laptop" and any item has quantity greater than 1:
+
+* db.orders.find({
+* "items.name": "Laptop",
+* "items.quantity": { $gt: 1 }
+* });
+
+  Result:
+
+* [
+
+- { "\_id": 1, "items": [{ "name": "Laptop", "quantity": 2 }, { "name": "Mouse", "quantity": 1 }] },
+- { "\_id": 3, "items": [{ "name": "Laptop", "quantity": 1 }, { "name": "Phone", "quantity": 3 }] }
+
+* ]
+
+#### Using $elemMatch:
+
+    The $elemMatch operator ensures that both conditions (name: "Laptop" and quantity: { $gt: 1 }) are satisfied by the same element in the array.
+    This is useful when you need to apply multiple conditions to the same subdocument.
+
+#### Without $elemMatch:
+
+    The query checks each condition independently across all elements in the array.
+    It may return documents where one element matches name: "Laptop" and another separate element matches quantity: { $gt: 1 }.
+
 ### db.collection.updateOne(filter, update, options)
 
      Updates a single document.
