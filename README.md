@@ -392,18 +392,98 @@ Result:
     replacement
 
     - Description: The new document that will replace the existing one.
-    - Type: Object
-      Note: The \_id field must be included if you want to keep it the same.
+    - Type: Object.
+    - Note: The \_id field must be included if you want to keep it the same.
     - Example: { name: "John", age: 30 }
 
     options
 
     - Description: Optional settings to modify the behavior of the operation.
     - Type: Object
-      Common Options:
+    - Common Options:
     - upsert: If true, creates a new document if no matching document is found.
     - Default is false.
       Example: { upsert: true }
+
+## Updating MongoDB Documents
+
+### updateOne()
+
+    updates a single document that matches the filter criteria.
+
+    Parameters
+
+- Filter: Specifies the criteria to match the document.
+- Update: Defines the update operations to apply.
+- Options: Optional settings for the update operation.
+- Example Collection
+- Suppose we have a collection users:
+
+  [
+  { "_id": 1, "name": "Alice", "age": 28, "city": "New York" },
+  { "_id": 2, "name": "Bob", "age": 34, "city": "Chicago" }
+  ]
+
+  Example of updateOne()
+  Let's update Bob's age:
+
+* db.users.updateOne(
+* { name: "Bob" }, // Filter
+* { $set: { age: 35 } }, // Update
+* { upsert: false } // Options
+* );
+
+Resulting Collection:
+
+- [
+- { "\_id": 1, "name": "Alice", "age": 28, "city": "New York" },
+- { "\_id": 2, "name": "Bob", "age": 35, "city": "Chicago" }
+- ]
+
+Update Operators
+
+### $set: Sets the value of a field.
+
+{ $set: { age: 35 } }
+
+### $inc: Increments the value of a field.
+
+    { $inc: { age: 1 } }
+
+### $unset: Removes a field from a document.
+
+    { $unset: { city: "" } }
+
+### $rename: Renames a field.
+
+    { $rename: { city: "location" } }
+
+### $addToSet: Adds an element to an array if it doesn't exist.
+
+    { $addToSet: { hobbies: "reading" } }
+
+### $push: Adds an element to the end of an array.
+
+    { $push: { hobbies: "reading" } }
+
+### Options
+
+### upsert: Creates a new document if no document matches the filter.
+
+{ upsert: true }
+
+### arrayFilters: Specifies filters for array elements when updating arrays.
+
+    {
+    arrayFilters: [{ "elem.age": { $gt: 30 } }]
+    }
+
+### Explanation
+
+    Filter: Determines which document to update.
+    Update: Specifies changes using update operators.
+    Options: Adjusts the behavior of the update operation.
+    updateOne() is powerful for making precise updates to your MongoDB documents.
 
 ### db.collection.updateOne(filter, update, options)
 
