@@ -749,6 +749,57 @@ For pagination, you often combine skip() with limit(). The skip() method specifi
     - { business_name: 1, result: 1, \_id: 0 }
   - )
 
+## Counting Documents in a MongoDB Collection
+
+### countDocuments()
+
+    is used to count the number of documents in a collection that match a specified filter.countDocuments() takes two parameters: a query document and an options document.
+
+- db.collection.countDocuments(query, options)
+
+query (Optional)
+
+- Description: Specifies the criteria to filter documents.
+- Example: { status: "active" } counts documents with the status field set to "active".
+
+options (Optional)
+
+- limit: Restricts the count to a specified number of documents.
+- Example: { limit: 10 } counts only up to 10 documents.
+
+skip: Skips a specified number of documents before counting.
+
+- Example: { skip: 5 } skips the first 5 documents.
+
+hint: Forces MongoDB to use a specific index for the count.
+
+- Example: { hint: "_id_" } uses the \_id index.
+
+#### Count All Documents
+
+- db.users.countDocuments();
+
+#### Count Documents with a Filter
+
+- db.users.countDocuments({ age: { $gte: 18 } });
+
+#### Count with Options
+
+- db.users.countDocuments(
+  - { age: { $gte: 18 } },
+  - { limit: 5, skip: 2 }
+- );
+
+#### Explanation
+
+- No Filter: Counts all documents in the collection.
+- Filter: Counts documents matching the specified criteria.
+- Options: Further refine the count operation using limit, skip, and hint.
+- Key Points
+- Efficient Counting: countDocuments() is optimized for counting documents with filters.
+
+* Options: Useful for pagination or performance tuning with indexes.
+
 ### db.collection.find( <query>, <projection> )
 
 ### db.collection.deleteOne(filter)
