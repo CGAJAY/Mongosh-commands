@@ -440,7 +440,7 @@ Resulting Collection:
 - { "\_id": 2, "name": "Bob", "age": 35, "city": "Chicago" }
 - ]
 
-Update Operators
+## Update Operators
 
 ### $set: Sets the value of a field.
 
@@ -485,17 +485,165 @@ Update Operators
     Options: Adjusts the behavior of the update operation.
     updateOne() is powerful for making precise updates to your MongoDB documents.
 
-### db.collection.updateOne(filter, update, options)
+## Updating MongoDB Documents by Using findAndModify()
 
-     Updates a single document.
+    findAndModify() is used to update documents and return the modified document.
+
+    Suppose we have a collection products:
+
+- [
+  - { "\_id": 1, "name": "Laptop", "price": 1200 },
+  - { "\_id": 2, "name": "Phone", "price": 800 }
+- ]
+
+  Example: Update and Return Modified Document
+  Let's increase the price of the laptop by 100 and return the updated document:
+
+  - db.products.findAndModify({
+    - query: { \_id: 1 },
+    - update: { $inc: { price: 100 } },
+    - new: true
+  - });
+
+  Result:
+  The document returned will be:
+
+  - { "\_id": 1, "name": "Laptop", "price": 1300 }
+
+  Explanation
+
+  - query: Specifies the document to update (\_id: 1).
+  - update: Defines the update operation ($inc increases the price by 100).
+  - new: true: Returns the updated document. By default, it returns the original document
+
+#### Return Value:
+
+    findAndModify() returns the modified document (if new: true is set).
+    updateOne() returns a write result object containing details about the operation, but not the document itself.
+
+#### Use Case:
+
+    findAndModify() is useful when you need to update a document and immediately use the modified version.
+    updateOne() is used when you only need to apply changes without needing the updated document immediately.
 
 ### db.collection.updateMany(filter, update, options)
 
-     Updates multiple documents.
+    is used to update multiple documents that match a given filter.
 
-### db.collection.replaceOne(filter, replacement)
+    Suppose we have a collection products with the following documents:
 
-     Replaces a document.
+- [
+  - { "\_id": 1, "name": "Laptop", "price": 1200, "category": "electronics" },
+  - { "\_id": 2, "name": "Phone", "price": 800, "category": "electronics" },
+  - { "\_id": 3, "name": "Shoes", "price": 100, "category": "clothing" },
+  - { "\_id": 4, "name": "Tablet", "price": 600, "category": "electronics" }
+- ]
+
+  Using updateMany()
+  Increase Price of All Electronics
+  Suppose we want to increase the price of all electronics by 10%.
+
+  - db.products.updateMany(
+    - { category: "electronics" }, // Filter: Match electronics
+    - { $mul: { price: 1.1 } } // Update: Multiply price by 1.1
+  - );
+
+            Resulting Collection:
+
+        - [
+          - { "\_id": 1, "name": "Laptop", "price": 1320, "category": "electronics" },
+          - { "\_id": 2, "name": "Phone", "price": 880, "category": "electronics" },
+          - { "\_id": 3, "name": "Shoes", "price": 100, "category": "clothing" },
+          - { "\_id": 4, "name": "Tablet", "price": 660, "category": "electronics" }
+        - ]
+
+        #### Filter: { category: "electronics" }
+
+        Matches all documents where the category is "electronics".
+
+        #### Update: { $mul: { price: 1.1 } }
+
+        Multiplies the price field by 1.1, effectively increasing the price by 10%.
+
+        #### options (Optional)
+
+        upsert: If true, creates a new document if no documents match the filter.
+        Default: false
+        Example: { upsert: true }
+
+    #### Key Points
+
+    Multiple Updates: updateMany() affects all documents matching the filter.
+    Atomic Operations: Uses operators like $set, $inc, $mul, etc., to modify fields.
+    No Effect on Non-matching Documents: Only updates documents that meet the filter criteria.
+    This method is powerful for bulk updates in a collection.
+
+## Deleting Documents in MongoDB
+
+### deleteOne(filter)
+
+    Deletes a single document that matches the filter criteria.
+
+- filter: Criteria to match the document you want to delete.
+
+  Example: { name: "Alice" }
+
+- options (Optional): Specifies language-specific rules for string comparison.
+- Example: { locale: "en", strength: 2 }
+  - db.collection.deleteOne(
+  - { name: "Alice" }
+  - );
+    This deletes the first document where the name is "Alice".
+
+### deleteMany(filter)
+
+Deletes all documents that match the filter criteria.
+filter: Criteria to match the documents you want to delete.
+
+    Example: { status: "inactive" }
+
+    options (Optional):
+    Specifies language-specific rules for string comparison.
+
+- db.collection.deleteMany(
+- { status: "inactive" }
+- );
+  This deletes all documents with a status of "inactive".
+
+### findOneAndDelete(filter)
+
+    Finds a single document and deletes it, returning the deleted document.
+
+    filter:
+    Criteria to match the document you want to delete.
+
+- Example: { age: { $gt: 30 } }
+
+  options (Optional):
+  Specifies fields to return in the document.
+
+  - Example: { name: 1, \_id: 0 }
+
+    sort:
+    Determines which document to delete if multiple documents match the filter.
+
+    - Example: { age: -1 } (deletes the oldest first)
+
+      collation:
+      Specifies language-specific rules for string comparison.
+
+      Example
+
+      - db.collection.findOneAndDelete(
+      - { age: { $gt: 30 } },
+      - { sort: { age: -1 } }
+      - );
+        This deletes and returns the oldest person over 30.
+
+    Summary
+    deleteOne(): Deletes the first matching document.
+    deleteMany(): Deletes all matching documents.
+    findOneAndDelete(): Finds, deletes, and returns a single document based on the criteria.
 
 ### db.collection.deleteOne(filter)
 
@@ -504,6 +652,10 @@ Update Operators
 ### db.collection.deleteMany(filter)
 
      Deletes multiple documents.
+
+### db.collection.replaceOne(filter, replacement)
+
+     Replaces a document.
 
 ## Index Commands
 
