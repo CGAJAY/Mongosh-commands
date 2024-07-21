@@ -800,6 +800,183 @@ hint: Forces MongoDB to use a specific index for the count.
 
 * Options: Useful for pagination or performance tuning with indexes.
 
+## Introduction to MongoDB Aggregation
+
+Aggregation: Collection and summary of data
+
+Stage: One of the built-in methods that can be completed on the data, but does not permanently alter it
+
+Aggregation pipeline: A series of stages completed on the data in order or sequence of stages, where each stage transforms the documents as they pass through.
+
+- db.collection.aggregate([
+-     {
+-         $stage1: {
+-             { expression1 },
+-             { expression2 }...
+-         },
+-         $stage2: {
+-             { expression1 }...
+-         }
+-     }
+- ])
+
+  Using $match and $group Stages in a MongoDB Aggregation Pipeline
+
+### $match
+
+    The $match stage filters for documents that match specified conditions.
+
+- { $match: { product: "laptop" } }
+- Selects sales documents where the product is "laptop".
+
+### $group
+
+     is used to group documents by a specified field and perform aggregate operations on each group. This stage is similar to the SQL GROUP BY clause.
+
+- {
+- $group: {
+-     _id: <expression>,
+-     <field1>: { <accumulator1>: <expression> },
+-     <field2>: { <accumulator2>: <expression> },
+-     ...
+- }
+- }
+
+#### Key Components
+
+- \_id: Specifies the field or expression to group documents by. Each unique value of \_id creates a new group.
+
+- field: Defines fields to include in the output. Use accumulator operators to calculate values for these fields.
+
+#### Common Accumulator Operators
+
+- $sum: Calculates the sum of numeric values.
+- $avg: Calculates the average of numeric values.
+- $max: Finds the maximum value.
+- $min: Finds the minimum value.
+- $first: Returns the first value in the group.
+- $last: Returns the last value in the group.
+
+#### Example 1: Sum of Sales by Region
+
+- db.sales.aggregate([
+- {
+-     $group: {
+-       _id: "$region",
+-       totalSales: { $sum: "$amount" }
+-     }
+- }
+- ])
+
+#### Explanation:
+
+- \_id: "$region": Groups documents by the region field.
+- totalSales: { $sum: "$amount" }: Calculates the total sales amount for each region.
+
+#### Example 2: Average Age by Department
+
+- db.employees.aggregate([
+- {
+-     $group: {
+-       _id: "$department",
+-       averageAge: { $avg: "$age" }
+-     }
+- }
+- ])
+
+#### Explanation:
+
+- \_id: "$department": Groups documents by the department field.
+- averageAge: { $avg: "$age" }: Calculates the average age of employees in each department.
+
+#### Example 3: Maximum and Minimum Scores by Subject
+
+- db.exams.aggregate([
+- {
+-     $group: {
+-       _id: "$subject",
+-       highestScore: { $max: "$score" },
+-       lowestScore: { $min: "$score" }
+-     }
+- }
+- ])
+
+#### Explanation:
+
+- \_id: "$subject": Groups documents by the subject field.
+- highestScore: { $max: "$score" }: Finds the highest score for each subject.
+- lowestScore: { $min: "$score" }: Finds the lowest score for each subject.
+
+#### Summary
+
+    Grouping: The $group stage organizes documents into groups based on the _id field.
+    Aggregation: Use accumulator operators to calculate aggregated values for each group.
+    Flexibility: Allows complex data summarization and analysis.
+
+### Combining $match and $group
+
+#### Filter Data First ($match)
+
+Start by using $match to filter the documents based on some criteria. This step reduces the dataset to relevant documents.
+
+#### Aggregate Data ($group)
+
+After filtering, use $group to perform aggregation operations like summing values, counting documents, or calculating averages.
+
+#### Example Scenario
+
+Imagine you have a sales collection with the following documents:
+
+- [
+- { "product": "laptop", "region": "North", "amount": 1200 },
+- { "product": "laptop", "region": "South", "amount": 1500 },
+- { "product": "phone", "region": "North", "amount": 800 },
+- { "product": "laptop", "region": "North", "amount": 1100 },
+- { "product": "phone", "region": "South", "amount": 700 }
+- ]
+
+#### Goal
+
+Find the total sales amount for "laptop" in each region.
+
+Aggregation Pipeline
+
+- db.sales.aggregate([
+- { $match: { product: "laptop" } }, // Step 1: Filter documents where product is "laptop"
+- { $group: { _id: "$region", totalSales: { $sum: "$amount" } } } // Step 2: Group by region and sum amounts
+- ])
+
+#### Explanation
+
+    $match: Filters the documents to include only those where the product is "laptop".
+
+- { $match: { product: "laptop" } }
+
+#### Resulting documents:
+
+- [
+- { "product": "laptop", "region": "North", "amount": 1200 },
+- { "product": "laptop", "region": "South", "amount": 1500 },
+- { "product": "laptop", "region": "North", "amount": 1100 }
+- ]
+
+  $group: Groups the filtered documents by region and calculates the total amount for each region.
+
+- { $group: { _id: "$region", totalSales: { $sum: "$amount" } } }
+
+#### Result:
+
+- [
+- { "\_id": "North", "totalSales": 2300 },
+- { "\_id": "South", "totalSales": 1500 }
+- ]
+
+#### Summary
+
+    $match filters the data to include only relevant documents.
+
+    $group performs aggregation on the filtered data.
+
 ### db.collection.find( <query>, <projection> )
 
 ### db.collection.deleteOne(filter)
