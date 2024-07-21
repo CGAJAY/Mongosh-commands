@@ -645,6 +645,70 @@ filter: Criteria to match the documents you want to delete.
     deleteMany(): Deletes all matching documents.
     findOneAndDelete(): Finds, deletes, and returns a single document based on the criteria.
 
+## Sorting and Limiting Query Results in MongoDB
+
+### sort()
+
+The sort() method specifies the order in which documents are returned.
+
+- db.collection.find().sort({ field: direction })
+- field: The field by which to sort the documents.
+- direction: The sort direction, where 1 indicates ascending order and -1 indicates descending order.
+
+  Example:
+  Suppose you have a products collection with the following documents:
+
+  - [
+    - { "\_id": 1, "name": "Laptop", "price": 1200 },
+    - { "\_id": 2, "name": "Phone", "price": 800 },
+    - { "\_id": 3, "name": "Tablet", "price": 600 }
+  - ]
+
+    Sort by price in ascending order:
+
+    - db.products.find().sort({ price: 1 });
+
+    Sort by price in descending order:
+
+    - db.products.find().sort({ price: -1 });
+
+### limit()
+
+Limiting the number of results returned can be done using the limit() method. The limit() method specifies the maximum number of documents to return.
+
+- db.collection.find().limit(number)
+- number: The maximum number of documents to return.
+
+Example:
+Limit to 2 documents:
+
+- db.products.find().limit(2);
+
+### Combining Sorting and Limiting
+
+You can combine both sort() and limit() methods to sort documents and then limit the number of results.
+
+Example:
+Sort by price in descending order and limit to 2 documents:
+
+- db.products.find().sort({ price: -1 }).limit(2);
+
+### Sorting and Limiting with Pagination
+
+For pagination, you often combine skip() with limit(). The skip() method specifies the number of documents to skip before returning results.
+
+- db.collection.find().skip(number).limit(number)
+- number: The number of documents to skip or limit.
+
+  Example:
+  Skip the first 2 documents and limit the results to 2 documents:
+
+  - db.products.find().skip(2).limit(2);
+    Summary
+    sort(): Orders the documents based on specified fields and directions.
+    limit(): Restricts the number of documents returned.
+    skip(): Skips a specified number of documents, often used with limit() for pagination.
+
 ### db.collection.deleteOne(filter)
 
      Deletes a single document.
