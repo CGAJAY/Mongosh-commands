@@ -704,10 +704,52 @@ For pagination, you often combine skip() with limit(). The skip() method specifi
   Skip the first 2 documents and limit the results to 2 documents:
 
   - db.products.find().skip(2).limit(2);
+
     Summary
     sort(): Orders the documents based on specified fields and directions.
     limit(): Restricts the number of documents returned.
     skip(): Skips a specified number of documents, often used with limit() for pagination.
+
+## Returning Specific Data from a Query in MongoDB
+
+    To specify fields to include or exclude in the result set, add a projection document as the second parameter in the call to db.collection.find().
+
+#### To include a field, set its value to 1 in the projection document.
+
+- db.collection.find( <query>, { <field> : 1 })
+
+  Example:
+
+  Return all restaurant inspections - business name, result, and \_id fields only
+
+  - db.inspections.find(
+    - { sector: "Restaurant - 818" },
+    - { business_name: 1, result: 1 }
+  - )
+
+#### To exclude a field, set its value to 0 in the projection document.
+
+- db.collection.find(query, { <field> : 0, <field>: 0 })
+
+  Example:
+
+  Return all inspections with result of "Pass" or "Warning" - exclude date and zip code
+
+  - db.inspections.find(
+    - { result: { $in: ["Pass", "Warning"] } },
+    - { date: 0, "address.zip": 0 }
+  - )
+
+  #### While the \_id field is included by default, it can be suppressed by setting its value to 0 in any projection.
+
+  Return all restaurant inspections - business name and result fields only
+
+  - db.inspections.find(
+    - { sector: "Restaurant - 818" },
+    - { business_name: 1, result: 1, \_id: 0 }
+  - )
+
+### db.collection.find( <query>, <projection> )
 
 ### db.collection.deleteOne(filter)
 
