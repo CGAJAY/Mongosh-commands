@@ -977,6 +977,230 @@ Aggregation Pipeline
 
     $group performs aggregation on the filtered data.
 
+### Using $sort and $limit Stages in a MongoDB Aggregation Pipeline
+
+In a MongoDB aggregation pipeline, the $sort and $limit stages are used to control the ordering and quantity of documents in the results
+
+### $sort
+
+The $sort stage sorts all input documents and returns them to the pipeline in sorted order. We use 1 to represent ascending order, and -1 to represent descending order.
+
+- Syntax: { $sort: { field1: 1, field2: -1 } }
+- 1: Ascending order.
+- -1: Descending order
+
+### $limit
+
+The $limit stage returns only a specified number of records.
+
+- Syntax: { $limit: n }
+- n: The maximum number of documents to return.
+
+### Combining $sort and $limit
+
+You can use $sort to order your documents and $limit to restrict the number of documents returned. This is useful for tasks like finding the top N results based on certain criteria.
+
+Suppose you have a sales collection with the following documents:
+
+- [
+- { "product": "laptop", "amount": 1200, "date": ISODate("2024-07-01T00:00:00Z") },
+- { "product": "phone", "amount": 700, "date": ISODate("2024-07-02T00:00:00Z") },
+- { "product": "tablet", "amount": 300, "date": ISODate("2024-07-03T00:00:00Z") },
+- { "product": "laptop", "amount": 1500, "date": ISODate("2024-07-04T00:00:00Z") },
+- { "product": "laptop", "amount": 900, "date": ISODate("2024-07-05T00:00:00Z") }
+- ]
+
+#### Goal
+
+Find the top 2 sales amounts for laptops, sorted by the highest amount.
+
+- db.sales.aggregate([
+- { $match: { product: "laptop" } }, // Filter to include only laptops
+- { $sort: { amount: -1 } }, // Sort by amount in descending order
+- { $limit: 2 } // Limit to the top 2 results
+- ])
+
+#### Explanation
+
+$match: Filters the documents to include only those where product is "laptop".
+
+- { $match: { product: "laptop" } }
+
+#### Resulting documents:
+
+- [
+- { "product": "laptop", "amount": 1200, "date": ISODate("2024-07-01T00:00:00Z") },
+- { "product": "laptop", "amount": 1500, "date": ISODate("2024-07-04T00:00:00Z") },
+- { "product": "laptop", "amount": 900, "date": ISODate("2024-07-05T00:00:00Z") }
+- ]
+
+  $sort: Sorts the filtered documents by amount in descending order.
+
+- { $sort: { amount: -1 } }
+
+Sorted documents:
+
+- [
+- { "product": "laptop", "amount": 1500, "date": ISODate("2024-07-04T00:00:00Z") },
+- { "product": "laptop", "amount": 1200, "date": ISODate("2024-07-01T00:00:00Z") },
+- { "product": "laptop", "amount": 900, "date": ISODate("2024-07-05T00:00:00Z") }
+- ]
+
+  $limit: Limits the result to the top 2 documents.
+
+- { $limit: 2 }
+
+#### Final result:
+
+- [
+- { "product": "laptop", "amount": 1500, "date": ISODate("2024-07-04T00:00:00Z") },
+- { "product": "laptop", "amount": 1200, "date": ISODate("2024-07-01T00:00:00Z") }
+- ]
+
+## Using $project, $count, and $set Stages in a MongoDB Aggregation Pipeline
+
+- [
+- { "name": "Alice", "score": 85, "class": "Math" },
+- { "name": "Bob", "score": 90, "class": "Science" },
+- { "name": "Charlie", "score": 75, "class": "Math" },
+- { "name": "David", "score": 92, "class": "Science" },
+- { "name": "Eve", "score": 48, "class": "Math" }
+- ]
+
+### $project
+
+The $project stage specifies the fields of the output documents. 1 means that the field should be included, and 0 means that the field should be supressed. The field can also be assigned a new value.
+Include only the name and create a new field passed that indicates if a student scored 50 or more.
+
+- db.students.aggregate([
+- {
+-     $project: {
+-       name: 1,
+-       passed: { $gte: ["$score", 50] }
+-     }
+- }
+- ])
+
+#### Explanation
+
+name: 1: Includes the name field.
+passed: A new field set to true if score is 50 or more, false otherwise.
+
+- [
+- { "name": "Alice", "passed": true },
+- { "name": "Bob", "passed": true },
+- { "name": "Charlie", "passed": true },
+- { "name": "David", "passed": true },
+- { "name": "Eve", "passed": false }
+- ]
+
+### $count
+
+The $count stage creates a new document, with the number of documents at that stage in the aggregation pipeline assigned to the specified field name.
+
+#### Goal
+
+Count how many students passed.
+
+- db.students.aggregate([
+- { $match: { score: { $gte: 50 } } },
+- { $count: "passedStudents" }
+- ])
+
+#### Explanation
+
+$match: Filters students with a score of 50 or more.
+$count: Counts these filtered documents.
+
+#### output
+
+- [
+- { "passedStudents": 4 }
+- ]
+
+### $set
+
+The $set stage creates new fields or changes the value of existing fields, and then outputs the documents with the new fields.
+
+#### Goal
+
+Add a field honors to indicate if a student scored 90 or more.
+
+- db.students.aggregate([
+- {
+- $set: {
+-       honors: { $gte: ["$score", 90] }
+- }
+- }
+- ])
+
+#### Explanation
+
+honors: A new field set to true if score is 90 or more.
+
+- [
+- { "name": "Alice", "score": 85, "class": "Math", "honors": false },
+- { "name": "Bob", "score": 90, "class": "Science", "honors": true },
+- { "name": "Charlie", "score": 75, "class": "Math", "honors": false },
+- { "name": "David", "score": 92, "class": "Science", "honors": true },
+- { "name": "Eve", "score": 48, "class": "Math", "honors": false }
+- ]
+
+#### Summary
+
+- $project: Selects fields and creates new ones.
+- $count: Provides a total count of documents after filtering.
+- $set: Adds or modifies fields within documents.
+
+### $out Stage
+
+writes the results of an aggregation pipeline to a specified collection.
+Use it to save the output of a pipeline to a new or existing collection.
+Overwrites the entire collection if it exists.
+If the collection does not exist, it creates a new one.
+
+#### Goal
+
+Filter students who passed and save the results to a new collection called passed_students.
+
+Initial students Collection
+
+- [
+- { "name": "Alice", "score": 85, "class": "Math" },
+- { "name": "Bob", "score": 90, "class": "Science" },
+- { "name": "Charlie", "score": 75, "class": "Math" },
+- { "name": "David", "score": 92, "class": "Science" },
+- { "name": "Eve", "score": 48, "class": "Math" }
+- ]
+
+Aggregation Pipeline
+
+- db.students.aggregate([
+- { $match: { score: { $gte: 50 } } }, // Filter students who passed
+- { $out: "passed_students" } // Save the results to the passed_students collection
+- ])
+
+#### Explanation
+
+$match: Filters the documents to include only students with a score of 50 or more.
+$out: Writes the filtered documents to the passed_students collection.
+
+#### Output
+
+The passed_students collection will contain:
+
+- [
+- { "name": "Alice", "score": 85, "class": "Math" },
+- { "name": "Bob", "score": 90, "class": "Science" },
+- { "name": "Charlie", "score": 75, "class": "Math" },
+- { "name": "David", "score": 92, "class": "Science" }
+- ]
+
+#### Summary
+
+$out is used to store the result of an aggregation pipeline in a new or existing collection.
+It helps persist the transformed data for future use or analysis.
+
 ### db.collection.find( <query>, <projection> )
 
 ### db.collection.deleteOne(filter)
