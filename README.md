@@ -1198,8 +1198,147 @@ The passed_students collection will contain:
 
 #### Summary
 
-$out is used to store the result of an aggregation pipeline in a new or existing collection.
-It helps persist the transformed data for future use or analysis.
+- $out is used to store the result of an aggregation pipeline in a new or existing collection.
+- It helps persist the transformed data for future use or analysis.
+
+## MongoDB Indexes
+
+Indexes are special data structures that store a small portion of the collection data in an ordered form. They make it faster to query data by providing quick access to the desired fields.
+Indexes point to the document identity and allow me to look up, access and update data faster
+Indexes also support equality matches and range-baseed opearations and return sorted results
+
+#### How Indexes Improve Performance
+
+- Faster Queries: Indexes allow MongoDB to quickly locate and access data without scanning the entire collection.
+- Efficient Sorting: They help sort query results efficiently without additional processing.
+- Reduced Resource Use: Queries with indexes use less CPU and memory.
+- Reduce disk I/O
+
+#### Cost of Using Indexes
+
+- Storage Overhead: Indexes require additional disk space.
+- Slower Writes: Insert, update, and delete operations may become slower because indexes need to be updated.
+- Maintenance: Indexes require periodic maintenance to remain efficient
+
+### createIndex()
+
+Creates a new index in a collection. Within the parentheses of createIndex(), include an object that contains the field and sort order.
+
+- db.customers.createIndex({
+  - birthdate: 1
+- })
+
+- Syntax: { birthdate: 1 } for ascending, { birthdate: -1 } for descending.
+- Usage: Speed up queries on a single field.
+
+### Create a Unique Single Field Index
+
+Add {unique:true} as a second, optional, parameter in createIndex() to force uniqueness in the index field values. Once the unique index is created, any inserts or updates including duplicated values in the collection for the index field/s will fail.
+
+- db.customers.createIndex({
+- email: 1
+- },
+- {
+- unique:true
+- })
+  MongoDB only creates the unique index if there is no duplication in the field values for the index field/s.
+
+### getIndexes()
+
+View the Indexes used in a Collection
+
+- db.customers.getIndexes()
+
+### explain()
+
+Provides detailed information on how MongoDB executes a query. Useful for understanding query performance.
+
+#### Key Parameters
+
+verbosity: Controls the amount of information returned.
+
+- "queryPlanner": Default. Shows query plan and index use.
+- "executionStats": Includes query performance statistics.
+- "allPlansExecution": Provides information on all query plans considered.
+
+#### How to Use explain()
+
+- db.collection.find(query).explain(verbosity)
+
+#### Example Collection
+
+Assume a students collection:
+
+- [
+  - { "name": "Alice", "score": 85 },
+  - { "name": "Bob", "score": 90 },
+  - { "name": "Charlie", "score": 75 }
+- ]
+
+#### Example Usage
+Get the query plan using default verbosity (queryPlanner):
+
+- db.students.find({ score: { $gt: 80 } }).explain("queryPlanner")
+
+#### Output Explanation
+
+queryPlanner: Shows whether an index is used and the strategy to find documents.
+
+- {
+  - "queryPlanner": {
+    - "plannerVersion": 1,
+    - "namespace": "test.students",
+    - "indexFilterSet": false,
+    - "parsedQuery": { "score": { "$gt": 80 } },
+    - "winningPlan": { /_ Plan details _/ },
+    - "rejectedPlans": [ /* Other considered plans */ ]
+- }
+- }
+
+#### Execution Stats
+
+Include performance statistics:
+
+- db.students.find({ score: { $gt: 80 } }).explain("executionStats")
+
+- Output Explanation
+
+  - executionStats: Adds execution time and number of documents scanned.
+
+- {
+  - "executionStats": {
+    - "nReturned": 2,
+    - "executionTimeMillis": 1,
+    - "totalKeysExamined": 0,
+    - "totalDocsExamined": 3
+  - }
+- }
+
+#### All Plans Execution
+
+Show details for all query plans considered:
+
+- db.students.find({ score: { $gt: 80 } }).explain("allPlansExecution")
+
+#### Output Explanation
+
+allPlansExecution: Provides details for all plans MongoDB considered.
+
+- {
+  - "allPlansExecution": [
+    - {
+    - "plan": { /_ Plan details _/ },
+    - "executionSuccess": true,
+    - "executionTimeMillisEstimate": 0
+    - }
+  - ]
+- }
+
+#### Summary
+
+explain() helps understand query performance and optimization.
+verbosity levels determine the depth of information provided.
+Useful for identifying slow queries and optimizing database performance.
 
 ### db.collection.find( <query>, <projection> )
 
